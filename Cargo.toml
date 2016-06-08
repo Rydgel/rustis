@@ -1,0 +1,6 @@
+[package]
+name = "rustis"
+version = "0.1.0"
+authors = ["Jérôme Mahuet <jerome.mahuet@gmail.com>"]
+
+[dependencies]
