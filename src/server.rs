@@ -79,7 +79,10 @@ impl Server {
         match command {
             Some(Command::Get(k)) => {
                 let value = data.get_value(k);
-                return value.to_string() + CRLF;
+                return
+                    String::from("$") +
+                    &value.len().to_string() + CRLF +
+                    value + CRLF;
             },
             Some(Command::Set(k, v)) => {
                 data.update_value(k, v);

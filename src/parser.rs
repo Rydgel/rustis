@@ -1,4 +1,14 @@
+use nom::*;
+
 use types::*;
+
+// macros + parser combinators definitions
+named!(parens, delimited!(char!('('), is_not!(")"), char!(')')));
+named!(bulk, delimited!(char!('$'), digit, line_ending));
+named!(multi_bulk, delimited!(char!('*'), digit, line_ending));
+named!(parse_reply_bytes, alt!(bulk | multi_bulk));
+
+// "*2\r\n$3\r\nget\r\n$4\r\nname\r\n"
 
 pub struct Parser;
 
@@ -10,7 +20,11 @@ impl Parser {
 
     fn parse_bytes(bytes: &[u8]) -> Reply {
         // todo
-        Reply::Bulk(None)
+        parens(bytes);
+        parse_reply_bytes(bytes);
+        //
+        Reply::Bulk(None);
+        return Reply::MultiBulk(None);
     }
 
     fn parse_reply(reply: Reply) -> Option<Command> {
