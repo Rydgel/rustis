@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-pub type Key = &'static str;
-pub type Value = &'static str;
+pub type Key = String;
+pub type Value = String;
 pub type DB = HashMap<Key, Value>;
 
 #[derive(PartialEq, Debug)]
@@ -11,9 +11,9 @@ pub enum Command {
     Unknown,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Reply {
-    Bulk(Option<&'static str>),
+    Bulk(Option<String>),
     MultiBulk(Option<Vec<Reply>>),
 }
 

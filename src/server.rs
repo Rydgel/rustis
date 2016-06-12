@@ -82,11 +82,11 @@ impl Server {
                 return
                     String::from("$") +
                     &value.len().to_string() + CRLF +
-                    value + CRLF;
+                    &value + CRLF;
             },
             Some(Command::Set(k, v)) => {
                 data.update_value(k, v);
-                return OK.to_string() + CRLF;
+                return OK.to_string();
             },
             Some(Command::Unknown)
                 => String::from("-ERR unknown command") + CRLF,
