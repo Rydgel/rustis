@@ -6,4 +6,6 @@ Toy project, don't expect good performance.
 Only GET and SET implemented right now.
 The key-value store is thread-safe (and atomic).
 
+You can use *redis-cli* to try.
+
 Code might be ugly for a Rust guru, feedback appreciated.
