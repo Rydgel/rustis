@@ -65,44 +65,20 @@ impl Parser {
         }
     }
 
-    fn parse_reply_get(xs: Vec<Reply>) -> Option<Command> {
-        if xs[0] == Reply::Bulk(Some("get".to_string())) {
-            match xs[1] {
-                Reply::Bulk(Some(ref a)) => Some(Command::Get(a.clone())),
-                _                        => Some(Command::Unknown)
-            }
-        } else {
-            return Some(Command::Unknown);
-        }
-    }
-
-    fn parse_reply_set(xs: Vec<Reply>) -> Option<Command> {
-        if (xs[0]) == Reply::Bulk(Some("set".to_string())) {
-            match (xs[1].clone(), xs[2].clone()) {
-                (Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b)))
-                      => Some(Command::Set(a.clone(), b.clone())),
-                (_,_) => Some(Command::Unknown)
-            }
-        } else {
-            return Some(Command::Unknown);
-        }
-    }
-
     fn parse_reply(reply: Reply) -> Option<Command> {
         match reply {
             Reply::MultiBulk(Some(xs)) => {
-                match xs.len() {
-                    2 => {
-                        // we would need to take the first non None parsing
-                        // when we would add more commands
-                        let get = Self::parse_reply_get(xs);
-                        return get;
-                    },
-                    3 => {
-                        let set = Self::parse_reply_set(xs);
-                        return set;
-                    },
-                    _ => Some(Command::Unknown),
+                match &xs[..] {
+                    [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))]
+                        if get == "get" => {
+                            return Some(Command::Get(a.clone()));
+                        },
+                    [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))]
+                        if set == "set" => {
+                            return Some(Command::Set(a.clone(), b.clone()))
+                        },
+                    _
+                        => return Some(Command::Unknown),
                 }
             },
             _ => None,
