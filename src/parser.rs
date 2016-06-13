@@ -8,67 +8,47 @@ use types::*;
 
 named!(i64_digit<i64>,
        map_res!(
-           map_res!(
-               digit,
-               str::from_utf8
-           ),
+           map_res!(digit, str::from_utf8),
            FromStr::from_str
        )
 );
 
 fn parse_bulk(input: &[u8]) -> IResult<&[u8], Reply> {
-    let (i1, digit) = try_parse!(
+    let (i1, command) = try_parse!(
         input,
         chain!(
             char!(b'$') ~
             d: i64_digit ~
+            tag_s!(b"\r\n") ~
+            s: map_res!(take!(d), str::from_utf8) ~
             tag_s!(b"\r\n"),
-            || { d }
+            || { s }
         )
     );
 
-    if digit < 0 {
-        return IResult::Done(input, Reply::Bulk(None));
-    } else {
-        let (i2, command) =
-            try_parse!(i1,
-                chain!(
-                    s: map_res!(take!(digit), str::from_utf8) ~
-                    tag_s!(b"\r\n"),
-                    || { s }
-                )
-            );
-        let command_str = String::from(command.to_ascii_lowercase());
-        return IResult::Done(i2, Reply::Bulk(Some(command_str)));
-    }
+    let command_str = String::from(command.to_ascii_lowercase());
+    return IResult::Done(i1, Reply::Bulk(Some(command_str)));
 }
 
 fn parse_multi_bulk(input: &[u8]) -> IResult<&[u8], Reply> {
-    let (i1, digit) = try_parse!(
+    let (i1, commands) = try_parse!(
         input,
         chain!(
             char!(b'*') ~
             d: i64_digit ~
-            tag_s!(b"\r\n"),
-            || { d }
+            tag_s!(b"\r\n") ~
+            c: count!(parse_bulk, d as usize),
+            || { c }
         )
     );
 
-    if digit < 0 {
-        return IResult::Done(input, Reply::MultiBulk(None));
-    } else {
-        let mut count = 1;
-        let mut im = i1;
-        let mut commands = vec![];
-        while count <= digit {
-            let (i2, command) = try_parse!(im, parse_bulk);
-            im = i2;
-            count = count + 1;
-            commands.push(command);
-        }
-        return IResult::Done(im, Reply::MultiBulk(Some(commands)));
-    }
+    return IResult::Done(i1, Reply::MultiBulk(Some(commands)));
 }
+
+named!(parse_bytes_nom<Reply>, alt!(
+      parse_bulk       => { |res: Reply| res }
+    | parse_multi_bulk => { |res: Reply| res }
+));
 
 pub struct Parser;
 
@@ -79,12 +59,9 @@ impl Parser {
     }
 
     fn parse_bytes(bytes: &[u8]) -> Reply {
-        match parse_bulk(bytes) {
+        match parse_bytes_nom(bytes) {
             IResult::Done(_, result) => result,
-            _ => match parse_multi_bulk(bytes) {
-                IResult::Done(_, result) => result,
-                _ => Reply::MultiBulk(None)
-            }
+            _                        => Reply::MultiBulk(None)
         }
     }
 
@@ -92,7 +69,7 @@ impl Parser {
         if xs[0] == Reply::Bulk(Some("get".to_string())) {
             match xs[1] {
                 Reply::Bulk(Some(ref a)) => Some(Command::Get(a.clone())),
-                _ => Some(Command::Unknown)
+                _                        => Some(Command::Unknown)
             }
         } else {
             return Some(Command::Unknown);
@@ -102,8 +79,8 @@ impl Parser {
     fn parse_reply_set(xs: Vec<Reply>) -> Option<Command> {
         if (xs[0]) == Reply::Bulk(Some("set".to_string())) {
             match (xs[1].clone(), xs[2].clone()) {
-                (Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))) =>
-                    Some(Command::Set(a.clone(), b.clone())),
+                (Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b)))
+                      => Some(Command::Set(a.clone(), b.clone())),
                 (_,_) => Some(Command::Unknown)
             }
         } else {
@@ -116,6 +93,8 @@ impl Parser {
             Reply::MultiBulk(Some(xs)) => {
                 match xs.len() {
                     2 => {
+                        // we would need to take the first non None parsing
+                        // when we would add more commands
                         let get = Self::parse_reply_get(xs);
                         return get;
                     },
