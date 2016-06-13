@@ -77,8 +77,7 @@ impl Parser {
                         if set == "set" => {
                             return Some(Command::Set(a.clone(), b.clone()))
                         },
-                    _
-                        => return Some(Command::Unknown),
+                    _    => return Some(Command::Unknown),
                 }
             },
             _ => None,
