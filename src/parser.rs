@@ -69,15 +69,11 @@ impl Parser {
         match reply {
             Reply::MultiBulk(Some(xs)) => {
                 match &xs[..] {
-                    [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))]
-                        if get == "get" => {
-                            return Some(Command::Get(a.clone()));
-                        },
-                    [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))]
-                        if set == "set" => {
-                            return Some(Command::Set(a.clone(), b.clone()))
-                        },
-                    _    => return Some(Command::Unknown),
+                    [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))] if get == "get"
+                        => Some(Command::Get(a.clone())),
+                    [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))] if set == "set"
+                        => Some(Command::Set(a.clone(), b.clone())),
+                    _   => Some(Command::Unknown),
                 }
             },
             _ => None,
