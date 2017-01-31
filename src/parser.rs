@@ -72,8 +72,9 @@ impl Parser {
                     [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))] if get == "get" => {
                         Some(Command::Get(a.clone()))
                     }
-                    [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))] if set == "set"
-                        => Some(Command::Set(a.clone(), b.clone())),
+                    [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))] if set == "set" => {
+                        Some(Command::Set(a.clone(), b.clone()))
+                    }
                     _ => Some(Command::Unknown),
                 }
             }
