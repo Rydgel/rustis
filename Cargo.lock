@@ -3,7 +3,7 @@ name = "rustis"
 version = "0.1.0"
 dependencies = [
  "clippy 0.0.112 (registry+https://github.com/rust-lang/crates.io-index)",
- "nom 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -56,6 +56,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "nom"
 version = "1.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "nom"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -160,6 +165,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum itoa 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "5537accdedeaa51526addad01e989bdaeb690e8e5fcca8dce893350912778636"
 "checksum matches 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "efd7622e3022e1a6eaa602c4cea8912254e5582c9c692e9167714182244801b1"
 "checksum nom 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "d1b06a35295796400a1db7382054f93713bf3924e7c268af94c5357b9fbf4cb6"
+"checksum nom 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e5d4598834859fedb9a0a69d5b862a970e77982a92f544d547257a4d49469067"
 "checksum num-traits 0.1.36 (registry+https://github.com/rust-lang/crates.io-index)" = "a16a42856a256b39c6d3484f097f6713e14feacd9bfb02290917904fae46c81c"
 "checksum quine-mc_cluskey 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "07589615d719a60c8dd8a4622e7946465dfef20d1a428f969e3443e7386d5f45"
 "checksum quote 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)" = "e7b44fd83db28b83c1c58187159934906e5e955c812e211df413b76b03c909a5"
