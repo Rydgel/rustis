@@ -16,7 +16,6 @@ pub struct Server {
 }
 
 impl Server {
-
     pub fn new(db: Database) -> Self {
         let database = Arc::new(Mutex::new(db));
         let address = "127.0.0.1:7777".parse::<SocketAddr>().unwrap();
@@ -25,16 +24,15 @@ impl Server {
 
         Server {
             database: database,
-            socket: server_socket
+            socket: server_socket,
         }
     }
 
     pub fn listen(&self) {
         // accept connections and process them, spawning a new thread for each one
         for stream in self.socket.incoming() {
-            match stream {
-                Ok(stream) => self.handle_client(stream),
-                Err(_) => { /* connection failed */ },
+            if let Ok(stream) = stream {
+                self.handle_client(stream)
             }
         }
     }
@@ -45,7 +43,7 @@ impl Server {
 
     fn handle_client(&self, mut stream: TcpStream) {
         let database = self.database.clone();
-        thread::spawn(move|| {
+        thread::spawn(move || {
             loop {
                 // todo implement the need for more buffer?
                 let mut buf = [0; 4 * 1024];
@@ -54,7 +52,7 @@ impl Server {
                     Err(e) => {
                         println!("Error while reading socket: {:?}", e);
                         return;
-                    },
+                    }
                     // EOF
                     Ok(0) => break,
                     // Receiving data
@@ -79,20 +77,14 @@ impl Server {
         match command {
             Some(Command::Get(k)) => {
                 let value = data.get_value(k);
-                return
-                    String::from("$") +
-                    &value.len().to_string() + CRLF +
-                    &value + CRLF;
-            },
+                String::from("$") + &value.len().to_string() + CRLF + &value + CRLF
+            }
             Some(Command::Set(k, v)) => {
                 data.update_value(k, v);
-                return OK.to_string();
-            },
-            Some(Command::Unknown)
-                => String::from("-ERR unknown command") + CRLF,
-            None
-                => String::from("-ERR nothing to do") + CRLF,
+                OK.to_string()
+            }
+            Some(Command::Unknown) => String::from("-ERR unknown command") + CRLF,
+            None => String::from("-ERR nothing to do") + CRLF,
         }
     }
-
 }

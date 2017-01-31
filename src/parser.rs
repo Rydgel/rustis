@@ -27,7 +27,8 @@ fn parse_bulk(input: &[u8]) -> IResult<&[u8], Reply> {
     );
 
     let command_str = String::from(command.to_ascii_lowercase());
-    return IResult::Done(i1, Reply::Bulk(Some(command_str)));
+
+    IResult::Done(i1, Reply::Bulk(Some(command_str)))
 }
 
 fn parse_multi_bulk(input: &[u8]) -> IResult<&[u8], Reply> {
@@ -42,7 +43,7 @@ fn parse_multi_bulk(input: &[u8]) -> IResult<&[u8], Reply> {
         )
     );
 
-    return IResult::Done(i1, Reply::MultiBulk(Some(commands)));
+    IResult::Done(i1, Reply::MultiBulk(Some(commands)))
 }
 
 named!(parse_bytes_nom<Reply>, alt!(
@@ -53,7 +54,6 @@ named!(parse_bytes_nom<Reply>, alt!(
 pub struct Parser;
 
 impl Parser {
-
     pub fn parse(bytes: &[u8]) -> Option<Command> {
         Self::parse_reply(Self::parse_bytes(bytes))
     }
@@ -61,23 +61,23 @@ impl Parser {
     fn parse_bytes(bytes: &[u8]) -> Reply {
         match parse_bytes_nom(bytes) {
             IResult::Done(_, result) => result,
-            _                        => Reply::MultiBulk(None)
+            _ => Reply::MultiBulk(None),
         }
     }
 
     fn parse_reply(reply: Reply) -> Option<Command> {
         match reply {
             Reply::MultiBulk(Some(xs)) => {
-                match &xs[..] {
-                    [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))] if get == "get"
-                        => Some(Command::Get(a.clone())),
+                match xs[..] {
+                    [Reply::Bulk(Some(ref get)), Reply::Bulk(Some(ref a))] if get == "get" => {
+                        Some(Command::Get(a.clone()))
+                    }
                     [Reply::Bulk(Some(ref set)), Reply::Bulk(Some(ref a)), Reply::Bulk(Some(ref b))] if set == "set"
                         => Some(Command::Set(a.clone(), b.clone())),
-                    _   => Some(Command::Unknown),
+                    _ => Some(Command::Unknown),
                 }
-            },
+            }
             _ => None,
         }
     }
-
 }
